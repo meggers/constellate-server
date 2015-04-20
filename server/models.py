@@ -17,7 +17,7 @@ class User(db.Model):
         return "<user: {}>".format(self.id)
 
     def __str__(self):
-        return "User: {}".format(self.id)
+        return "User: {}".format(self.username)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
