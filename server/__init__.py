@@ -1,6 +1,7 @@
 import os
 import json
-from flask import Flask, request, Response
+from flask import Flask
+from flask.ext.restful import Api, Resource
 from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
