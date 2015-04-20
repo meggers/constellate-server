@@ -14,7 +14,10 @@ class User(db.Model):
         self.email = email
 
     def __repr__(self):
-        return self.username
+        return "<user: {}>".format(self.id)
+
+    def __str__(self):
+        return "User: {}".format(self.id)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -40,14 +43,56 @@ class User(db.Model):
         user = User.query.get(data['id'])
         return user
 
+class Constellation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return "<constellation: {}>".format(self.id)
+
+    def __str__(self):
+        return "Constellation: {}".format(self.name)
+
+class Vector(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    constellation = db.relationship('Constellation', backref='vector', lazy='dynamic')
+    star = db.relationship('Star', backref='vector', lazy='dynamic')
+
+    constellation_id = db.Column(db.Integer, db.ForeignKey('constellation.id'))
+    a = db.Column(db.Integer, db.ForeignKey('star.id'))
+    b = db.Column(db.Integer, db.ForeignKey('star.id'))
+
+    def __init__(self, constellation_id, a, b):
+            self.constellation_id = constellation_id
+            self.a = a
+            self.b = b
+
+    def __repr__(self):
+        return "<vector: {}>".format(self.id)
+
+    def __str__(self):
+        return "Vector: {} to {} from constellation {}".format(self.a, self.b, self.constellation)
+
 class Star(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     ra = db.Column(db.Float)
     dec = db.Column(db.Float)
     mag = db.Column(db.Float)
 
-    def __init__(self, id, ra, dec, mag):
+    def __init__(self, id, name, ra, dec, mag):
         self.id = id
+        self.name = name
         self.ra = ra
         self.dec = dec
         self.mag = mag
+
+    def __repr__(self):
+        return "<star: {}>".format(self.id)
+
+    def __str__(self):
+        return "Star: {}".format(self.name)
