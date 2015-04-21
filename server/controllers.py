@@ -1,5 +1,8 @@
-from server import app, db, session
 from flask import Flask, request, Response
+from flask import redirect, jsonify
+
+from server import app, db, session
+from server.models import *
 
 # routing for basic page #
 @app.route('/')
@@ -21,7 +24,36 @@ def logout():
 # user #
 @app.route('/api/v1/user/', methods=['POST'])
 def add_user():
-    return {'':''}, 200
+    # parse the json
+    json = request.get_json()
+
+    # extract data
+    username = json.get('username')
+    email = json.get('email')
+    password = json.get('password')
+
+    # sanity checks
+    if not username:
+        return jsonify(response="Could not create User, username is required"), 400
+
+    if not email:
+        return jsonify(response="Could not create User, email is required"), 400
+
+    if not password:
+        return jsonify(response="Could not create User, password is required"), 400
+
+    # create user and commit 
+    new_user = User(username=username, email=email, password=password)
+    session.add(new_user)
+    session.commit()
+    
+    # make sure db xact occured
+    if not new_user.id:
+        return jsonify(response="Could not create User"), 404
+    
+    # Return an auth token on success
+    token = new_user.generate_token()
+    return jsonify({ 'token': token.decode('ascii') }), 201
 
 @app.route('/api/v1/user/', methods=['GET'])
 def get_user():
