@@ -35,6 +35,7 @@ def verify_password(username_or_token, password):
 @app.route('/api/v1/login', methods=['GET'])
 @auth.login_required
 def login():
+    # grab and return authenticated user token
     token = g.user.generate_token()
     return jsonify({ 'token': token.decode('ascii') })
 
@@ -75,22 +76,51 @@ def add_user():
 @app.route('/api/v1/user/', methods=['GET'])
 @auth.login_required
 def get_user():
+    # grab authenticated user
     user = g.user
 
-    if not user:
-        return jsonify(response="Could not fetch user"), 400
-
+    # return user params
     return jsonify(id=user.id, username=user.username, email=user.email), 200
 
 @app.route('/api/v1/user/', methods=['PUT'])
 @auth.login_required
 def update_user():
-    return {'':''}, 200
+    # grab authenticated user
+    user = g.user
+
+    # parse the json
+    json = request.get_json()
+
+    # update changed fields
+    if json.get('username'):
+        user.username = json.get('username')
+
+    if json.get('email'):
+        user.email = json.get('email')
+
+    if json.get('password'):
+        user.email = json.get('password')
+
+    # commit changes
+    session.commit()   
+
+    # Return an auth token on success
+    token = user.generate_token()
+    return jsonify({ 'token': token.decode('ascii') }), 201
 
 @app.route('/api/v1/user/', methods=['DELETE'])
 @auth.login_required
 def delete_user():
-    return {'':''}, 200
+    # grab authenticated user
+    user = g.user
+
+    # delete user from db
+    session.delete(user)
+
+    # commit changes
+    session.commit()
+
+    return jsonify(response="User deleted."), 201
 
 # constellations #
 @app.route('/api/v1/constellations/', methods=['POST'])
