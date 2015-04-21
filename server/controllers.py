@@ -32,7 +32,7 @@ def verify_password(username_or_token, password):
 #******* API v1 ********#
 
 # api authentication #
-@app.route('/api/v1/login', methods=['GET'])
+@app.route('/api/v1/login/x', methods=['GET'])
 @auth.login_required
 def login():
     # grab and return authenticated user token
@@ -125,6 +125,29 @@ def delete_user():
 # constellations #
 @app.route('/api/v1/constellations/', methods=['POST'])
 def add_constellation(constellation_id):
+    # grab authenticated user
+    user = g.user
+
+    # parse the json
+    json = request.get_json()
+
+    # extract data
+    name = json.get('name')
+    vectors = json.get('vectors')
+
+    # sanity checks
+    if not name:
+        return jsonify(response="Could not create Constellation, name is required"), 400
+
+    if not vectors:
+        return jsonify(response="Could not create Constellations, one or more vectors are required"), 400
+
+    # create new constellation for authenticated user
+    constellation = Constellation(user_id=user.id, name=name)
+    session.add(constellation)
+
+    # create vectors for constellation
+
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/', methods=['GET'])
