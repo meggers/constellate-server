@@ -38,10 +38,6 @@ def login():
     token = g.user.generate_token()
     return jsonify({ 'token': token.decode('ascii') })
 
-@app.route('/api/v1/logout', methods=['GET'])
-def logout():
-    return {'':''}, 200
-
 # user #
 @app.route('/api/v1/user/', methods=['POST'])
 def add_user():
