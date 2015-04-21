@@ -8,6 +8,8 @@ class User(db.Model):
     password_hash = db.Column(db.String(128))
     email = db.Column(db.String)
 
+    constellations = db.relationship('Constellation', backref='user', lazy='dynamic')
+
     def __init__(self, username, password, email):
         self.username = username
         self.hash_password(password);
@@ -45,6 +47,7 @@ class User(db.Model):
 
 class Constellation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String)
 
     vectors = db.relationship('Vector', backref='constellation', lazy='dynamic')
