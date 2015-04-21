@@ -47,6 +47,8 @@ class Constellation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
 
+    vectors = db.relationship('Vector', backref='constellation', lazy='dynamic')
+
     def __init__(self, name):
         self.name = name
 
@@ -56,13 +58,17 @@ class Constellation(db.Model):
     def __str__(self):
         return "Constellation: {}".format(self.name)
 
+stars = db.Table('stars',
+    db.Column('vector_id', db.Integer, db.ForeignKey('vector.id')),
+    db.Column('star_id', db.Integer, db.ForeignKey('star.id'))
+)
+
 class Vector(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
-    constellation = db.relationship('Constellation', backref='vector', lazy='dynamic')
-    star = db.relationship('Star', backref='vector', lazy='dynamic')
-
     constellation_id = db.Column(db.Integer, db.ForeignKey('constellation.id'))
+
+    stars = db.relationship('Star', secondary=stars, backref=db.backref('vectors', lazy='dynamic'))
+
     a = db.Column(db.Integer, db.ForeignKey('star.id'))
     b = db.Column(db.Integer, db.ForeignKey('star.id'))
 

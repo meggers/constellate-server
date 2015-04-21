@@ -1,3 +1,4 @@
+import os
 import argparse
 
 from server import app, db, session
@@ -10,6 +11,16 @@ def drop_db():
     db.drop_all()
 
 def seed_db():
+
+    # add the users
+    user_ids = []
+    users = ["default","nick","matt","max"]
+    for name in users:
+        new_user = User(username=name, email="{}@email.com".format(name), password="default")
+        session.add(new_user)
+        session.commit()
+        user_ids.append(new_user.id)
+
     return
 
 def main():

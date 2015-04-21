@@ -23,16 +23,16 @@ def logout():
 def add_user():
     return {'':''}, 200
 
-@app.route('/api/v1/user/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+@app.route('/api/v1/user/', methods=['GET'])
+def get_user():
     return {'':''}, 200
 
-@app.route('/api/v1/user/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
+@app.route('/api/v1/user/', methods=['PUT'])
+def update_user():
     return {'':''}, 200
 
-@app.route('/api/v1/user/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
+@app.route('/api/v1/user/', methods=['DELETE'])
+def delete_user():
     return {'':''}, 200
 
 # constellations #
