@@ -11,7 +11,6 @@ def drop_db():
     db.drop_all()
 
 def seed_db():
-
     # add the users
     user_ids = []
     users = ["default","nick","matt","max"]

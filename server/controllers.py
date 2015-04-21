@@ -1,7 +1,8 @@
 from flask import Flask, request, Response
 from flask import redirect, jsonify
+from flask import g
 
-from server import app, db, session
+from server import app, auth, db, session
 from server.models import *
 
 # routing for basic page #
@@ -9,13 +10,33 @@ from server.models import *
 def basic_pages(**kwargs):
     return redirect('/static/index.html')
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify(response="Invalid Request"), 404
+
+# authentication wrapper #
+@auth.verify_password
+def verify_password(username_or_token, password):
+    # first try to authenticate by token
+    user = User.verify_token(username_or_token)
+    if not user:
+        # try to authenticate with username/password
+        user = User.query.filter_by(username = username_or_token).first()
+        if not user or not user.verify_password(password):
+            return False
+
+    g.user = user
+    return True
+
 
 #******* API v1 ********#
 
 # api authentication #
 @app.route('/api/v1/login', methods=['GET'])
+@auth.login_required
 def login():
-    return {'':''}, 200
+    token = g.user.generate_token()
+    return jsonify({ 'token': token.decode('ascii') })
 
 @app.route('/api/v1/logout', methods=['GET'])
 def logout():
