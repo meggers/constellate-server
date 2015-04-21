@@ -73,14 +73,17 @@ def add_user():
     return jsonify({ 'token': token.decode('ascii') }), 201
 
 @app.route('/api/v1/user/', methods=['GET'])
+@auth.login_required
 def get_user():
     return {'':''}, 200
 
 @app.route('/api/v1/user/', methods=['PUT'])
+@auth.login_required
 def update_user():
     return {'':''}, 200
 
 @app.route('/api/v1/user/', methods=['DELETE'])
+@auth.login_required
 def delete_user():
     return {'':''}, 200
 
