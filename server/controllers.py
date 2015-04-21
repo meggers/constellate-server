@@ -75,7 +75,12 @@ def add_user():
 @app.route('/api/v1/user/', methods=['GET'])
 @auth.login_required
 def get_user():
-    return {'':''}, 200
+    user = g.user
+
+    if not user:
+        return jsonify(response="Could not fetch user"), 400
+
+    return jsonify(id=user.id, username=user.username, email=user.email), 200
 
 @app.route('/api/v1/user/', methods=['PUT'])
 @auth.login_required
