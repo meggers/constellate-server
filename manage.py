@@ -12,16 +12,25 @@ def drop_db():
     db.drop_all()
 
 def seed_db():
-    # add the users
-    user_ids = []
-    users = ["default","nick","matt","max"]
-    for name in users:
-        new_user = User(username=name, email="{}@email.com".format(name), password="default")
-        session.add(new_user)
-        session.commit()
-        user_ids.append(new_user.id)
+    # add default user
+    default_user = User(username="default", email="default@email.com", password="default")
+    session.add(default_user)
+    session.commit()
 
-    return
+    # add all stars
+    with open(settings.STAR_FILE, 'rb') as f:
+        reader = csv.reader(f)
+        reader.next()
+        for row in reader:
+            id = int(row[settings.ID_INDEX])
+            ra = float(row[settings.RA_INDEX])
+            dec = float(row[settings.DEC_INDEX])
+            mag = float(row[settings.MAG_INDEX])
+
+            star = Star(id=id, ra=ra, dec=dec, mag=mag)
+            session.add(star)
+
+    session.commit()
 
 def main():
     parser = argparse.ArgumentParser(description='Manage the Constellate db')
@@ -39,7 +48,7 @@ def main():
 
     elif args.command == 'seed_db':
         seed_db()
-        print "db deleted!"
+        print "db seeded!"
 
 if __name__ == '__main__':
     main()

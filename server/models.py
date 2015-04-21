@@ -94,9 +94,9 @@ class Star(db.Model):
     dec = db.Column(db.Float)
     mag = db.Column(db.Float)
 
-    def __init__(self, id, name, ra, dec, mag):
+    def __init__(self, id, ra, dec, mag):
         self.id = id
-        self.name = name
+        self.name = "star {}".format(self.id)
         self.ra = ra
         self.dec = dec
         self.mag = mag
