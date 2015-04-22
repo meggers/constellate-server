@@ -151,11 +151,22 @@ def add_constellation(constellation_id):
         new_vector = Vector(constellation_id=new_constellation.id, a=vector[0], b=vector[1])
         session.add(new_vector)
 
+    # commit additions and return constellation id
     session.commit()
     return jsonify(constellation_id=new_constellation.id), 201
 
 @app.route('/api/v1/constellations/', methods=['GET'])
 def get_constellations():
+    # grab authenticated user
+    user = g.user
+
+    # look up all the constellations associated with the user
+    constellations = session.query(Constellation).filter_by(user_id=user.id).all()
+
+    # sanity check
+    if not constellations:
+        return jsonify(response="No constellations found for user: {}".format(user.id)), 404
+
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['GET'])
@@ -173,4 +184,3 @@ def get_constellations_with_star(star_id):
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
 def delete_constellation(constellation_id):
     return {'':''}, 200
-
