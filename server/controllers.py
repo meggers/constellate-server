@@ -106,7 +106,7 @@ def update_user():
 
     # Return an auth token on success
     token = user.generate_token()
-    return jsonify({ 'token': token.decode('ascii') }), 201
+    return jsonify({ 'token': token.decode('ascii') }), 200
 
 @app.route('/api/v1/user/', methods=['DELETE'])
 @auth.login_required
@@ -120,7 +120,7 @@ def delete_user():
     # commit changes
     session.commit()
 
-    return jsonify(response="User deleted."), 201
+    return jsonify(response="User deleted."), 200
 
 # constellations #
 @app.route('/api/v1/constellations/', methods=['POST'])
@@ -143,12 +143,16 @@ def add_constellation(constellation_id):
         return jsonify(response="Could not create Constellations, one or more vectors are required"), 400
 
     # create new constellation for authenticated user
-    constellation = Constellation(user_id=user.id, name=name)
-    session.add(constellation)
+    new_constellation = Constellation(user_id=user.id, name=name)
+    session.add(new_constellation)
 
     # create vectors for constellation
+    for vector in vectors:
+        new_vector = Vector(constellation_id=new_constellation.id, a=vector[0], b=vector[1])
+        session.add(new_vector)
 
-    return {'':''}, 200
+    session.commit()
+    return jsonify(constellation_id=new_constellation.id), 201
 
 @app.route('/api/v1/constellations/', methods=['GET'])
 def get_constellations():
