@@ -8,6 +8,7 @@ SQLAlchemy==1.0.0
 Werkzeug==0.10.4
 aniso8601==0.92
 argparse==1.2.1
+gunicorn==19.3.0
 itsdangerous==0.24
 passlib==1.6.2
 pytz==2015.2
