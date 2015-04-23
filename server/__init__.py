@@ -15,3 +15,6 @@ app.url_map.strict_slashes = False
 
 import server.models
 import server.controllers
+
+if __name__ == "__main__":
+    application.run(host='0.0.0.0')
