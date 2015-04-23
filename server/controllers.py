@@ -217,6 +217,11 @@ def get_constellations_with_star(star_id):
     # grab authenticated user
     user = g.user
 
+    # grab all vectors with given star_id
+    vectors = session.query(Vector).filter((Vector.a == star_id) | (Vector.b == star_id)).all()
+
+    # find constellations owned by user that contain vectors with given star_id
+
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
@@ -240,3 +245,4 @@ def delete_constellation(constellation_id):
 
     # return
     return jsonify(response="Constellation deleted."), 200
+
