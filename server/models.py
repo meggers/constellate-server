@@ -1,4 +1,5 @@
 from server import app, db, session
+from flask import jsonify
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
@@ -20,6 +21,9 @@ class User(db.Model):
 
     def __str__(self):
         return "User: {}".format(self.username)
+
+    def to_JSON(self):
+        return jsonify(id=self.id, username=self.username, email=self.email)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -62,6 +66,9 @@ class Constellation(db.Model):
     def __str__(self):
         return "Constellation: {}".format(self.name)
 
+    def to_obj(self):
+        return {"id":self.id, "name":self.name}
+
 stars = db.Table('stars',
     db.Column('vector_id', db.Integer, db.ForeignKey('vector.id')),
     db.Column('star_id', db.Integer, db.ForeignKey('star.id'))
@@ -85,7 +92,10 @@ class Vector(db.Model):
         return "<vector: {}>".format(self.id)
 
     def __str__(self):
-        return "Vector: {} to {} from constellation {}".format(self.a, self.b, self.constellation)
+        return "Vector: {} to {} from constellation {}".format(self.a, self.b, self.constellation_id)
+
+    def to_array(self):
+        return [self.a, self.b]
 
 class Star(db.Model):
     id = db.Column(db.Integer, primary_key=True)

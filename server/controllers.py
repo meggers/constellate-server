@@ -32,12 +32,12 @@ def verify_password(username_or_token, password):
 #******* API v1 ********#
 
 # api authentication #
-@app.route('/api/v1/login/x', methods=['GET'])
+@app.route('/api/v1/login/', methods=['GET'])
 @auth.login_required
 def login():
     # grab and return authenticated user token
     token = g.user.generate_token()
-    return jsonify({ 'token': token.decode('ascii') })
+    return jsonify({ 'token': token.decode('ascii') }), 200
 
 # user #
 @app.route('/api/v1/user/', methods=['POST'])
@@ -71,6 +71,7 @@ def add_user():
     
     # Return an auth token on success
     token = new_user.generate_token()
+    print jsonify({ 'token': token.decode('ascii') })
     return jsonify({ 'token': token.decode('ascii') }), 201
 
 @app.route('/api/v1/user/', methods=['GET'])
@@ -80,7 +81,7 @@ def get_user():
     user = g.user
 
     # return user params
-    return jsonify(id=user.id, username=user.username, email=user.email), 200
+    return user.to_JSON(), 200
 
 @app.route('/api/v1/user/', methods=['PUT'])
 @auth.login_required
@@ -120,11 +121,13 @@ def delete_user():
     # commit changes
     session.commit()
 
+    # return
     return jsonify(response="User deleted."), 200
 
 # constellations #
 @app.route('/api/v1/constellations/', methods=['POST'])
-def add_constellation(constellation_id):
+@auth.login_required
+def add_constellation():
     # grab authenticated user
     user = g.user
 
@@ -145,17 +148,19 @@ def add_constellation(constellation_id):
     # create new constellation for authenticated user
     new_constellation = Constellation(user_id=user.id, name=name)
     session.add(new_constellation)
+    session.commit()
 
     # create vectors for constellation
     for vector in vectors:
         new_vector = Vector(constellation_id=new_constellation.id, a=vector[0], b=vector[1])
         session.add(new_vector)
+        session.commit()
 
-    # commit additions and return constellation id
-    session.commit()
+    # return constellation id
     return jsonify(constellation_id=new_constellation.id), 201
 
 @app.route('/api/v1/constellations/', methods=['GET'])
+@auth.login_required
 def get_constellations():
     # grab authenticated user
     user = g.user
@@ -167,20 +172,29 @@ def get_constellations():
     if not constellations:
         return jsonify(response="No constellations found for user: {}".format(user.id)), 404
 
-    return {'':''}, 200
+    return_list = []
+    for constellation in constellations:
+        vectors = session.query(Vector).filter_by(constellation_id=constellation.id).all()
+        return_list.append({"info":constellation.to_obj(), "vectors":[vector.to_array() for vector in vectors]})
+
+    return jsonify(constellations=return_list), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['GET'])
+@auth.login_required
 def get_constellation(constellation_id):
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['PUT'])
+@auth.login_required
 def update_constellation(constellation_id):
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/star/<int:star_id>', methods=['GET'])
+@auth.login_required
 def get_constellations_with_star(star_id):
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
+@auth.login_required
 def delete_constellation(constellation_id):
     return {'':''}, 200
