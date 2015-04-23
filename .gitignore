@@ -58,4 +58,6 @@ target/
 
 # ENTERED BY MAX
 flask/
+run.sh
+api_test.sh
 server.db
