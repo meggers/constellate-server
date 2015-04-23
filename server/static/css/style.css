@@ -5,3 +5,13 @@ html {
     -o-background-size: cover;
     background-size: cover;
 }
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+}
+
+#container {
+    margin-top: 100px;
+    color: #ffffff;
+}
