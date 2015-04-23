@@ -60,4 +60,6 @@ target/
 flask/
 run.sh
 api_test.sh
+.idea/
+constellate-server.iml
 server.db
