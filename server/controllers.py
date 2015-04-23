@@ -187,7 +187,7 @@ def get_constellation(constellation_id):
     # grab authenticated user
     user = g.user
 
-    # get the track
+    # get the constellation
     constellation = session.query(Constellation).get(constellation_id)
 
     # sanity check
@@ -203,14 +203,40 @@ def get_constellation(constellation_id):
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['PUT'])
 @auth.login_required
 def update_constellation(constellation_id):
+    # grab authenticated user
+    user = g.user
+
+    # get the constellation
+    constellation = session.query(Constellation).get(constellation_id)
+
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/star/<int:star_id>', methods=['GET'])
 @auth.login_required
 def get_constellations_with_star(star_id):
+    # grab authenticated user
+    user = g.user
+
     return {'':''}, 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
 @auth.login_required
 def delete_constellation(constellation_id):
-    return {'':''}, 200
+    # grab authenticated user
+    user = g.user
+
+    # get the constellation
+    constellation = session.query(Constellation).get(constellation_id)
+
+    # sanity check
+    if not constellation:
+        return jsonify(response="Constellation {} not found for user: ".format(constellation_id, user.id)), 404
+
+    # delete constellation from db
+    session.delete(constellation)
+
+    # commit changes
+    session.commit()
+
+    # return
+    return jsonify(response="Constellation deleted."), 200
