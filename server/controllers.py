@@ -172,17 +172,33 @@ def get_constellations():
     if not constellations:
         return jsonify(response="No constellations found for user: {}".format(user.id)), 404
 
+    # compose each constellation
     return_list = []
     for constellation in constellations:
         vectors = session.query(Vector).filter_by(constellation_id=constellation.id).all()
         return_list.append({"info":constellation.to_obj(), "vectors":[vector.to_array() for vector in vectors]})
 
+    # return
     return jsonify(constellations=return_list), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['GET'])
 @auth.login_required
 def get_constellation(constellation_id):
-    return {'':''}, 200
+    # grab authenticated user
+    user = g.user
+
+    # get the track
+    constellation = session.query(Constellation).get(constellation_id)
+
+    # sanity check
+    if not constellation:
+        return jsonify(response="Constellation {} not found for user: ".format(constellation_id, user.id)), 404
+
+    # grab vectors for constellation
+    vectors = session.query(Vector).filter_by(constellation_id=constellation_id).all()
+
+    # compose response and return
+    return jsonify(info=constellation.to_obj(), vectors=[vector.to_array() for vector in vectors]), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['PUT'])
 @auth.login_required
