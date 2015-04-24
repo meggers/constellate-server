@@ -5,7 +5,7 @@ from flask.ext.restful import Api, Resource
 from flask.ext.httpauth import HTTPBasicAuth
 from flask.ext.sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 
 app.config.from_object('server.settings')
 db = SQLAlchemy(app)
@@ -17,4 +17,4 @@ import server.models
 import server.controllers
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0')
+    app.run()

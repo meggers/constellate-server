@@ -8,7 +8,7 @@ from server.models import *
 # routing for basic page #
 @app.route('/')
 def basic_pages(**kwargs):
-    return redirect('/static/index.html')
+    return app.send_static_file('index.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
