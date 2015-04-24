@@ -4,7 +4,6 @@ html {
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-
 }
 
 body {
@@ -14,6 +13,6 @@ body {
 }
 
 #container {
-    margin-top: 100px;
+    margin-top: 150px;
     color: #ffffff;
 }
