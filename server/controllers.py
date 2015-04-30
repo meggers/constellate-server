@@ -2,7 +2,7 @@ from flask import Flask, request, Response
 from flask import redirect, jsonify
 from flask import g
 
-from server import app, auth, db, session
+from server import app, auth, session
 from server.models import *
 
 # routing for basic page #
