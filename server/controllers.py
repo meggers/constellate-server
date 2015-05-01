@@ -207,9 +207,37 @@ def update_constellation(constellation_id):
     user = g.user
 
     # get the constellation
-    constellation = session.query(Constellation).get(constellation_id)
+    constellation = session.query(Constellation)\
+        .filter((Constellation.id==constellation_id) & (Constellation.user_id==user.id))\
+        .first()
 
-    return {'':''}, 200
+    if not constellation:
+        return jsonify(response="Constellation not found for authenticated user."), 404
+
+    # parse the json
+    json = request.get_json()
+
+    # extract constellation data
+    name = json.get('name')
+    vectors = json.get('vectors')
+
+    # update the constellation information
+    if name:
+        constellation.name = name
+        session.commit()
+
+    # if we got new vectors
+    if vectors:
+        # delete all vectors associated with the constellation
+        session.query(Vector)
+
+        # associate new vectors with constellation
+        for vector in vectors:
+            new_vector = Vector(constellation_id=constellation.id, a=vector[0], b=vector[1])
+            session.add(new_vector)
+            session.commit()
+
+    return jsonify(response="Constellation Added"), 200
 
 @app.route('/api/v1/constellations/star/<int:star_id>', methods=['GET'])
 @auth.login_required
