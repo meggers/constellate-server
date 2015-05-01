@@ -217,12 +217,31 @@ def get_constellations_with_star(star_id):
     # grab authenticated user
     user = g.user
 
-    # grab all vectors with given star_id
-    vectors = session.query(Vector).filter((Vector.a == star_id) | (Vector.b == star_id)).all()
+    # grab all constellation ids with given star_id
+    constellation_ids = session.query(Vector.constellation_id).filter((Vector.a == star_id) | (Vector.b == star_id)).all()
+    if not constellation_ids:
+        return jsonify(response="That star is not in any constellations for this user."), 404
 
-    # find constellations owned by user that contain vectors with given star_id
+    # reformat to something that doesn't suck
+    constellation_ids = [constellation_id[0] for constellation_id in constellation_ids]
 
-    return {'':''}, 200
+    # grab constellations from ids
+    constellations = session.query(Constellation).filter(Constellation.id.in_(constellation_ids))
+
+    # grab all vectors for each constellation
+    constellation_data = []
+    for constellation in constellations:
+        # grab vectors for constellation
+        vectors = session.query(Vector).filter_by(constellation_id=constellation.id).all()
+
+        # compile into response array
+        constellation_data.append({
+            'info':constellation.to_obj(),
+            'vectors':[vector.to_array() for vector in vectors]
+        })
+
+    # return compiled constellation data
+    return jsonify(constellations=constellation_data), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
 @auth.login_required
