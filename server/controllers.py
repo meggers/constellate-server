@@ -1,8 +1,11 @@
+from functools import wraps
+
 from flask import Flask, request, Response
 from flask import redirect, jsonify
 from flask import g
+from flask_jwt import JWT, jwt_required
 
-from server import app, auth, session
+from server import app, jwt, session
 from server.models import *
 
 # routing for basic page #
@@ -14,30 +17,33 @@ def basic_pages(**kwargs):
 def page_not_found(e):
     return jsonify(response="Invalid Request"), 404
 
-# authentication wrapper #
-@auth.verify_password
-def verify_password(username_or_token, password):
-    # first try to authenticate by token
-    user = User.verify_token(username_or_token)
-    if not user:
-        # try to authenticate with username/password
-        user = User.query.filter_by(username = username_or_token).first()
-        if not user or not user.verify_password(password):
-            return False
+class UserObj(object):
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
-    g.user = user
-    return True
+@jwt.authentication_handler
+def authenticate(username, password):
+    user = session.query(User).filter_by(username = username).first()
+    if user and user.verify_password(password):
+        return UserObj(id=user.id, username=user.username)
 
+@jwt.user_handler
+def load_user(payload):
+    user = session.query(User).filter_by(id = payload['user_id']).first()
+    if user:
+        return UserObj(id=user.id, username=user.username)
+
+def protected(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        verify_jwt()
+        g.user = session.query(User).get(current_user.id)
+
+        return func(*args, **kwargs)
+    return decorated_function
 
 #******* API v1 ********#
-
-# api authentication #
-@app.route('/api/v1/login/', methods=['GET'])
-@auth.login_required
-def login():
-    # grab and return authenticated user token
-    token = g.user.generate_token()
-    return jsonify({ 'token': token.decode('ascii') }), 200
 
 # user #
 @app.route('/api/v1/user/', methods=['POST'])
@@ -75,7 +81,7 @@ def add_user():
     return jsonify({ 'token': token.decode('ascii') }), 201
 
 @app.route('/api/v1/user/', methods=['GET'])
-@auth.login_required
+@protected
 def get_user():
     # grab authenticated user
     user = g.user
@@ -84,7 +90,7 @@ def get_user():
     return user.to_JSON(), 200
 
 @app.route('/api/v1/user/', methods=['PUT'])
-@auth.login_required
+@protected
 def update_user():
     # grab authenticated user
     user = g.user
@@ -110,7 +116,7 @@ def update_user():
     return jsonify({ 'token': token.decode('ascii') }), 200
 
 @app.route('/api/v1/user/', methods=['DELETE'])
-@auth.login_required
+@protected
 def delete_user():
     # grab authenticated user
     user = g.user
@@ -126,7 +132,7 @@ def delete_user():
 
 # constellations #
 @app.route('/api/v1/constellations/', methods=['POST'])
-@auth.login_required
+@protected
 def add_constellation():
     # grab authenticated user
     user = g.user
@@ -160,7 +166,7 @@ def add_constellation():
     return jsonify(constellation_id=new_constellation.id), 201
 
 @app.route('/api/v1/constellations/', methods=['GET'])
-@auth.login_required
+@protected
 def get_constellations():
     # grab authenticated user
     user = g.user
@@ -182,7 +188,7 @@ def get_constellations():
     return jsonify(constellations=return_list), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['GET'])
-@auth.login_required
+@protected
 def get_constellation(constellation_id):
     # grab authenticated user
     user = g.user
@@ -201,7 +207,7 @@ def get_constellation(constellation_id):
     return jsonify(info=constellation.to_obj(), vectors=[vector.to_array() for vector in vectors]), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['PUT'])
-@auth.login_required
+@protected
 def update_constellation(constellation_id):
     # grab authenticated user
     user = g.user
@@ -240,7 +246,7 @@ def update_constellation(constellation_id):
     return jsonify(response="Constellation Added"), 200
 
 @app.route('/api/v1/constellations/star/<int:star_id>', methods=['GET'])
-@auth.login_required
+@protected
 def get_constellations_with_star(star_id):
     # grab authenticated user
     user = g.user
@@ -272,7 +278,7 @@ def get_constellations_with_star(star_id):
     return jsonify(constellations=constellation_data), 200
 
 @app.route('/api/v1/constellations/<int:constellation_id>', methods=['DELETE'])
-@auth.login_required
+@protected
 def delete_constellation(constellation_id):
     # grab authenticated user
     user = g.user
