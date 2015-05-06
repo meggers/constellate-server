@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Flask, request, Response
 from flask import redirect, jsonify
 from flask import g
-from flask_jwt import JWT, jwt_required
+from flask_jwt import verify_jwt
 
 from server import app, jwt, session
 from server.models import *
