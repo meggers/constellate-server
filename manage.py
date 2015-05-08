@@ -32,6 +32,24 @@ def seed_db():
 
     session.commit()
 
+    # add all constellations
+    with open(settings.CONST_FILE, 'rb') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            name = row[settings.NAME_INDEX]
+            a, b = int(row[settings.A_INDEX]), int(row[settings.B_INDEX])
+
+            constellation = session.query(Constellation).filter_by(name=name).first()
+            if not constellation:
+                constellation = Constellation(user_id=default_user.id, name=name)
+                session.add(constellation)
+                session.commit()
+
+            vector = Vector(constellation_id=constellation.id, a=a, b=b)
+            session.add(vector)
+            session.commit()
+
+
 def main():
     parser = argparse.ArgumentParser(description='Manage the Constellate db')
     parser.add_argument('command', help='the name of the command you want to run')

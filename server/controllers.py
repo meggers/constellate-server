@@ -4,6 +4,7 @@ from flask import Flask, request, Response
 from flask import redirect, jsonify
 from flask import g
 from flask_jwt import verify_jwt
+from flask.ext.jwt import current_user
 
 from server import app, jwt, session
 from server.models import *
