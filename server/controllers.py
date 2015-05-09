@@ -76,10 +76,8 @@ def add_user():
     if not new_user.id:
         return jsonify(response="Could not create User"), 404
     
-    # Return an auth token on success
-    token = new_user.generate_token()
-    print jsonify({ 'token': token.decode('ascii') })
-    return jsonify({ 'token': token.decode('ascii') }), 201
+    # Return user_id on success
+    return jsonify(user_id=new_user.id), 201
 
 @app.route('/api/v1/user/', methods=['GET'])
 @protected
